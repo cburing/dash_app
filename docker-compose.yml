@@ -1,0 +1,38 @@
+version: "3"
+services:
+  backend:
+    image: dash_app_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dash_app_backend_container
+    volumes:
+      - ./backend:/app
+      - ./docker/util:/util
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+    entrypoint: /util/wait-for-it.sh db:5432 --strict -t 60 --
+    command: python3 app.py
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-dash_app_db}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin}
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+  db:
+    image: postgres:10
+    restart: always
+    container_name: dash_app_db_container
+    volumes:
+      - pg_volume:/var/lib/postgresql/data
+      - ./docker/database:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-dash_app_db}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin}
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+    ports:
+      - "5432:5432"
+volumes:
+# docker volume create pg_volume
+  pg_volume:
+    external: true

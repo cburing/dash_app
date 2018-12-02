@@ -1,0 +1,5 @@
+dash==0.31.1
+dash-auth==1.2.0
+pandas==0.19.2
+SQLAlchemy==1.1.6
+psycopg2
